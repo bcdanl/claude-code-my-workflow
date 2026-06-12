@@ -85,3 +85,17 @@ scripts/R/_outputs/
 # Output artifacts — uncomment lines below based on your preference
 # *.rds
 # output/**/*.rds
+
+# ------------------------------------------------------------------------------
+# Project data — PROPRIETARY. Never commit (public remote).
+#   Sustainalytics ESG risk ratings (licensed) + Yahoo Finance financials.
+#   See .claude/rules/confidential-data.md rule #1: raw data never enters git.
+#   Commit CODE and disclosure-cleared, derived outputs only.
+# ------------------------------------------------------------------------------
+data/raw/*
+data/cleaned/*
+!data/raw/.gitkeep
+!data/cleaned/.gitkeep
+
+# Reference PDFs — copyrighted author/working-paper copies; never commit.
+references/*.pdf

@@ -41,6 +41,7 @@ pipeline_env <- new.env(parent = globalenv())
 pipeline_env$PROJECT_SEED <- PROJECT_SEED
 pipeline_env$OUT_DIR      <- OUT_DIR
 
+# Full pipeline: data prep (01-02) -> estimation (03) -> tables (04) -> figures (05).
 pipeline <- c(
   "01_load.R",
   "02_clean.R",

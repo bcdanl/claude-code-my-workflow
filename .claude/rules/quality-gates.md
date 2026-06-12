@@ -60,10 +60,15 @@ Save to `quality_reports/merges/YYYY-MM-DD_[branch-name].md`.
 
 ## Tolerance Thresholds (Research)
 
-<!-- Customize for your domain -->
+Used by `/audit-reproducibility` to compare numeric claims in `paper/` against
+`scripts/R/_outputs/`. Consistent with `replication-protocol.md` Phase 3.
 
 | Quantity | Tolerance | Rationale |
 |----------|-----------|-----------|
-| Point estimates | [e.g., 1e-6] | [Numerical precision] |
-| Standard errors | [e.g., 1e-4] | [MC variability] |
-| Coverage rates | [e.g., +/- 0.01] | [MC with B reps] |
+| Integers (N, firm counts, df) | Exact match | No reason for any difference |
+| Point estimates (β, ATT, Δ) | < 0.01 (abs) | Display rounding in the paper |
+| Standard errors | < 0.05 (abs) | HC1/robust-vcov implementation variation |
+| First-stage F | < 0.1, and same side of 10 | Weak-IV threshold must agree |
+| P-values | Same significance level | Exact p may differ in trailing digits |
+| Percentages / shares | < 0.1 pp | Display rounding |
+| Correlations / R² | < 0.01 | Display rounding |

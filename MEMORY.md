@@ -5,6 +5,43 @@ When a mistake is corrected, append a `[LEARN:category]` entry below.
 
 ---
 
+## Project: ESG Risk (working project — read first)
+
+**Paper:** "ESG Risk and Regulatory Uncertainty: Evidence from U.S. Climate-Disclosure Shocks."
+**Author:** Byeong-Hak Choe, SUNY Geneseo — **single-authored** (writing voice = "I").
+**Type:** empirical paper + R workflow (this repo is a working project, *not* a slide deck —
+the template's `Slides/`/`Quarto/`/TikZ infrastructure is **dormant**).
+
+- **Policy framing.** The shock is the **SEC's 2024 climate-disclosure rule** — a major but
+  legally contested mandate that created uncertainty about future climate-risk reporting. The
+  paper asks whether that policy uncertainty caused meaningful within-firm changes in ESG risk
+  assessments, controversies, and capital-market/corporate outcomes — not cross-sectional
+  ESG correlations.
+- **Design.** Two-period firm-year panel (March 2024, March 2025), U.S. firms. First differences
+  (2025 − 2024) **instrumented** by exposure to Sustainalytics' **2024 rating-system change**
+  (the methodology update mechanically shifted measured E/S/G risk). Instruments `Z_E`, `Z_S`,
+  `Z_G` for `d_E`, `d_S`, `d_G`. Balanced panel (firms in both years). Outcomes: cost of
+  capital, investor response, risk, liquidity, controversy, real behavior.
+- **[LEARN:identification] The provisional instruments are WEAK (verified 2026-06-11).**
+  First-stage robust F: d_E~Z_E=0.01, d_S~Z_S=0.38, d_G~Z_G=4.36 (all < 10). Stronger
+  candidates tested on the model-ready frame: leave-one-out industry-mean Δpillar gives d_S
+  F≈10.5 and d_G F≈12.7 (both > 10) but **d_E stays weak (7.9) under every candidate**;
+  baseline-level instrument is strong for d_S (F≈46) but not credibly excludable. The clean
+  firm-level MEI-exposure instrument needs Sustainalytics' MEI-by-subindustry weights, absent
+  from the raw data. → Identification direction is an open user decision.
+- **Data (PROPRIETARY — gitignored, public remote).** Sustainalytics ESG pillar/controversy
+  (`data/raw/esg_proj_2024.csv`, `esg_proj_2025.csv`) + rating-enhancement overview; Yahoo Finance
+  income/balance-sheet/cash-flow (annual + quarterly) for controls/outcomes. `data/raw/` and
+  `data/cleaned/` are gitignored — commit code + disclosure-cleared outputs only.
+- **`esg-messy.R`** is exploratory scratch (and reads from `data/` not `data/raw/` — known path
+  bug). It is the *input* to the data-prep task, refactored into `01_load.R`…`05_figures.R`.
+- **Workflow preferences.** Structured, precise, rigorous; publication-ready visuals on first pass;
+  don't make him repeat himself (capture decisions here). Plan-first for non-trivial tasks; after
+  plan approval, **contractor mode** (execute autonomously, surface only decisions) — but check in
+  *more often* during the first few sessions while he learns the workflow.
+
+---
+
 <!-- Append new entries below. Most recent at bottom. -->
 
 ## Workflow Patterns
