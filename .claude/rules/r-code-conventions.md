@@ -35,29 +35,47 @@ paths:
 
 ## 4. Visual Identity
 
+**This is a paper project: figures are for LaTeX inclusion and must be
+publication-ready on the first pass.** Restrained, print-safe, colorblind-aware.
+
 ```r
-# --- Your institutional palette ---
-primary_blue  <- "#012169"
-primary_gold  <- "#f2a900"
-accent_gray   <- "#525252"
-positive_green <- "#15803d"
-negative_red  <- "#b91c1c"
+# --- ESG-paper palette (print-safe; Okabe–Ito-derived) ---
+primary_navy   <- "#1f2a44"   # main series / axis emphasis
+accent_teal    <- "#2c7fb8"   # secondary series
+accent_amber   <- "#d9883b"   # third series / highlight
+neutral_gray   <- "#6b6f76"   # gridlines, de-emphasis
+positive_green <- "#117733"   # gains / "good" annotations (colorblind-safe)
+negative_red   <- "#cc6677"   # losses / "bad" annotations (colorblind-safe)
+
+# Pillar colors (E/S/G) — used consistently across every figure in the paper.
+pillar_cols <- c(E = "#117733", S = "#2c7fb8", G = "#88419d")
 ```
 
-### Custom Theme
+### Paper Theme
 ```r
-theme_custom <- function(base_size = 14) {
-  theme_minimal(base_size = base_size) +
+theme_paper <- function(base_size = 11) {     # 11pt ≈ paper body text
+  theme_minimal(base_size = base_size, base_family = "serif") +
     theme(
-      plot.title = element_text(face = "bold", color = primary_blue),
-      legend.position = "bottom"
+      plot.title       = element_text(face = "bold", color = primary_navy, size = rel(1.05)),
+      plot.subtitle    = element_text(color = neutral_gray),
+      axis.title       = element_text(color = primary_navy),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_line(color = "grey90", linewidth = 0.3),
+      legend.position  = "bottom",
+      legend.title     = element_blank(),
+      plot.margin      = margin(4, 6, 4, 4)
     )
 }
 ```
 
-### Figure Dimensions for Beamer
+### Figure Dimensions for the Paper (default)
 ```r
-ggsave(filepath, width = 12, height = 5, bg = "transparent")
+# Single-column LaTeX figure: ~6.5 in usable text width, 300 dpi for print.
+# White (not transparent) bg — figures sit on a white page, not a dark slide.
+ggsave(filepath, width = 6.5, height = 4, units = "in", dpi = 300, bg = "white")
+
+# Dormant teaching path (Beamer slides) — transparent, wide — only if revived:
+# ggsave(filepath, width = 12, height = 5, bg = "transparent")
 ```
 
 ## 5. RDS Data Pattern
@@ -73,8 +91,11 @@ saveRDS(result, file.path(out_dir, "descriptive_name.rds"))
 <!-- Add your field-specific pitfalls here -->
 | Pitfall | Impact | Prevention |
 |---------|--------|------------|
-| Missing `bg = "transparent"` | White boxes on slides | Always include in ggsave() |
-| Hardcoded paths | Breaks on other machines | Use relative paths |
+| Hardcoded paths | Breaks on other machines | Use `here::here()` / relative paths |
+| Reading from `data/` not `data/raw/` | File-not-found (the `esg-messy.R` bug) | All raw reads go through `data/raw/` |
+| Two-period panel: unbalanced firms | Δ undefined for firms in one year only | Keep only firms present in both 2024 and 2025 |
+| `controversy` parsed as character in 2025 | Silent join/type errors | Coerce with `as.numeric()` at load, check NAs |
+| `ivreg` default (classical) SEs | Wrong inference | Always `vcovHC(type = "HC1")` for IV summaries |
 
 ## 7. Line Length & Mathematical Exceptions
 

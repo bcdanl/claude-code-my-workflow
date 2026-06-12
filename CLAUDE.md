@@ -1,72 +1,93 @@
-# CLAUDE.MD -- Academic Project Development with Claude Code
+# CLAUDE.MD -- ESG Risk and Regulatory Uncertainty
 
-<!-- HOW TO USE: Replace [BRACKETED PLACEHOLDERS] with your project info.
-     Customize Beamer environments and CSS classes for your theme.
-     Keep this file under ~150 lines — Claude loads it every session.
-     See the guide at docs/workflow-guide.html for full documentation. -->
-
-**Project:** [YOUR PROJECT NAME]
-**Institution:** [YOUR INSTITUTION]
+**Project:** ESG Risk and Regulatory Uncertainty: Evidence from U.S. Climate-Disclosure Shocks
+**Author:** Byeong-Hak Choe (single-authored)
+**Institution:** SUNY Geneseo
+**Type:** Empirical paper + R workflow
 **Branch:** main
+
+> This repo is a working *research project* built on a fork of the
+> `claude-code-my-workflow` template. The template ships slide/lecture
+> infrastructure (`Slides/`, `Quarto/`, TikZ rules, palette sync). For THIS
+> project that scaffolding is **dormant** — kept in place for a possible future
+> teaching path (`/teach-from-paper`), not used for the paper. Active work is
+> **R data prep → IV estimation → LaTeX tables → LaTeX manuscript.**
+
+---
+
+## Research Summary
+
+A two-period (March 2024, March 2025) firm-year panel of U.S. companies that asks
+whether *within-firm* changes in ESG risk ratings causally affect corporate and
+capital-market outcomes — moving beyond the cross-sectional ESG correlations that
+dominate the literature.
+
+**Identification.** First differences (2025 − 2024) instrumented by Sustainalytics'
+**2024 rating-system change**: the methodology update mechanically shifted measured
+E/S/G risk for firms exposed to specific enhancements (water, cyber/data-privacy,
+stakeholder-governance), giving a source of quasi-exogenous variation in ΔE, ΔS, ΔG.
+Industry-level exposure to each enhancement × the rating change → instruments
+`Z_E`, `Z_S`, `Z_G`.
+
+**Candidate outcomes.** Cost of capital, investor response, firm risk, liquidity,
+controversy, and real corporate behavior (investment, financing).
 
 ---
 
 ## Core Principles
 
-- **Plan first** -- enter plan mode before non-trivial tasks; save plans to `quality_reports/plans/`
-- **Verify after** -- compile/render and confirm output at the end of every task
-- **Single source of truth** -- Beamer `.tex` is authoritative; Quarto `.qmd` derives from it
-- **Quality gates** -- nothing ships below 80/100
-- **[LEARN] tags** -- when corrected, save `[LEARN:category] wrong → right` to [MEMORY.md](MEMORY.md)
+- **Plan first** — enter plan mode before non-trivial tasks; save plans to `quality_reports/plans/`.
+- **Verify after** — run the R pipeline / compile the paper and confirm outputs at the end of every task.
+- **Single source of truth** — the **R pipeline produces every number**; the LaTeX manuscript is authoritative for prose. Each coefficient, SE, N, and percentage in `paper/` traces to a file in `scripts/R/_outputs/` and is logged in the claims passport.
+- **Reproducibility is non-negotiable** — `set.seed()` once, relative paths, `00_run_all.R` reruns clean end-to-end (see `.claude/rules/r-code-conventions.md`).
+- **Publication-ready visuals** — every figure is print-quality on the first pass (`theme_paper()`, LaTeX column dimensions). No default-ggplot gray.
+- **Quality gates** — nothing ships below 80/100.
+- **[LEARN] tags** — when corrected, save `[LEARN:category] wrong → right` to [MEMORY.md](MEMORY.md) so decisions are not re-litigated.
 
-Cross-session context lives in [MEMORY.md](MEMORY.md); past plans, specs, and session logs are in [quality_reports/](quality_reports/).
+Cross-session context lives in [MEMORY.md](MEMORY.md); plans, specs, session logs, and the claims passport are in [quality_reports/](quality_reports/).
 
 ---
 
 ## Folder Structure
 
 ```
-[YOUR-PROJECT]/
+esg-risk-santanna/
 ├── CLAUDE.MD                    # This file
 ├── .claude/                     # Rules, skills, agents, hooks
+├── data/
+│   ├── raw/                     # PROPRIETARY — gitignored (Sustainalytics + Yahoo Finance)
+│   └── cleaned/                 # Derived, model-ready data (gitignored)
+├── scripts/R/                   # Analysis pipeline (00→05) + esg-messy.R (exploratory)
+│   └── _outputs/                # Tables, figures, RDS — generated, gitignored
+├── paper/                       # LaTeX manuscript (main.tex); tables/figures from _outputs/
 ├── Bibliography_base.bib        # Centralized bibliography
-├── Figures/                     # Figures and images
-├── Preambles/header.tex         # LaTeX headers
-├── Slides/                      # Beamer .tex files
-├── Quarto/                      # RevealJS .qmd files + theme
-├── docs/                        # GitHub Pages (auto-generated)
-├── scripts/                     # Utility scripts + R code
-├── quality_reports/             # Plans, session logs, merge reports, decision records
+├── quality_reports/             # Plans, specs, session logs, passports, decision records
 ├── explorations/                # Research sandbox (see rules)
-├── templates/                   # Session log, quality report templates
-└── master_supporting_docs/      # Papers and existing slides
+├── templates/                   # Session log, spec, passport, decision-record templates
+└── Slides/, Quarto/, Figures/   # DORMANT — template teaching path, not used for the paper
 ```
+
+**Data is proprietary.** Sustainalytics ESG ratings are licensed; the remote is public.
+`data/raw/` and `data/cleaned/` are gitignored — commit *code* and disclosure-cleared
+*derived outputs* only. See [`.claude/rules/confidential-data.md`](.claude/rules/confidential-data.md).
 
 ---
 
 ## Commands
 
 ```bash
-# LaTeX (3-pass, XeLaTeX only)
-cd Slides && TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
-BIBINPUTS=..:$BIBINPUTS bibtex file
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
-TEXINPUTS=../Preambles:$TEXINPUTS xelatex -interaction=nonstopmode file.tex
+# Run the full R pipeline (seeded, end-to-end) — run this, not individual scripts
+Rscript scripts/R/00_run_all.R
 
-# Deploy Quarto to GitHub Pages
-./scripts/sync_to_docs.sh LectureN
+# Quality score an R script
+python scripts/quality_score.py scripts/R/02_clean.R
 
-# Quality score
-python scripts/quality_score.py Quarto/file.qmd
+# Audit every numeric claim in the paper against scripts/R/_outputs/
+# (via the /audit-reproducibility skill)
 
-# Palette sync (LaTeX ↔ SCSS)
-./scripts/check-palette-sync.sh
-
-# Surface-count sync (README ↔ CLAUDE.md ↔ guide ↔ landing page)
-./scripts/check-surface-sync.sh
+# Compile the manuscript (from paper/)
+cd paper && latexmk -pdf main.tex      # or: xelatex -interaction=nonstopmode main.tex
 ```
-
-**Palette contract:** color names in `Preambles/header.tex` must match SCSS variables in `Quarto/theme-template.scss`. See [`Preambles/README.md`](Preambles/README.md).
 
 ---
 
@@ -78,48 +99,57 @@ python scripts/quality_score.py Quarto/file.qmd
 | 90 | PR | Ready for deployment |
 | 95 | Excellence | Aspirational |
 
-Enforced by `/commit` (halts + asks for override) **and** — once you run `./scripts/install-hooks.sh` — by a real git pre-commit hook (`.githooks/pre-commit`) that runs the surface-sync + quality (≥80) gates on every commit. Bypass sparingly with `SKIP_QUALITY_GATE=1` or `--no-verify`.
+Enforced by `/commit` (halts + asks for override) **and** — once you run `./scripts/install-hooks.sh` — by a git pre-commit hook (`.githooks/pre-commit`). Bypass sparingly with `SKIP_QUALITY_GATE=1` or `--no-verify`.
 
 ---
 
-## Skills Quick Reference
+## Active Rules (this project)
 
-The full table of all skills lives in [README.md](README.md#skills-claudeskills). Most-used, by workflow:
+These load when relevant and govern the work:
 
-- **Slides / teaching:** `/create-lecture` `/compile-latex` `/deploy` `/qa-quarto` `/slide-excellence` `/syllabus` `/teach-from-paper` `/scaffold-exercises`
-- **Papers / review:** `/review-paper` (`--peer`) `/seven-pass-review` `/respond-to-referees` `/verify-claims` `/proofread` `/humanize` `/submission-disclosures`
-- **Data / reproducibility:** `/data-analysis` `/did-event-study` `/simulation-study` `/audit-reproducibility` `/diagnose` `/replication-package` `/capture-environment` `/power-analysis` `/disclosure-check`
-- **Research / writing:** `/interview-me` `/lit-review` `/research-ideation` `/preregister` `/grant-proposal` `/data-management-plan`
-- **Meta / workflow:** `/commit` `/learn` `/new-skill` `/checkpoint` `/context-status` `/deep-audit` `/coauthor-brief` `/triage-inbox`
+- **`r-code-conventions`** — R standards, the project palette, `theme_paper()`, numerical discipline.
+- **`replication-protocol`** + claims **passport** (`quality_reports/passports/esg-risk.yaml`) — every paper number traces to code.
+- **`inference-robustness`** — multiple testing across E/S/G × outcomes; weak-IV reporting (first-stage robust F).
+- **`cross-artifact-review`** — `/review-paper` also reviews the R scripts that produced the tables.
+- **`confidential-data`** — proprietary-data handling (the gitignore + disclosure contract above).
+- **`writing-style-choe`** — the manuscript's voice (single-authored "I").
+- **`plan-first-workflow`**, **`session-logging`**, **`quality-gates`** — process.
+- `did-conventions` is **reference-only** — the design is IV / first-differences, not staggered DiD.
 
-Stata (`/stata-replication`), R packages (`/r-package-check`), TikZ (`/extract-tikz`, `/new-diagram`), and more — see the README for the complete index.
+**Dormant** (slides not in active use): `beamer-quarto-sync`, `no-pause-beamer`, `tikz-*`,
+`single-source-of-truth` (slide-framed), `content-invariants` INV-1…INV-8, palette sync.
+Empirical invariants INV-9…INV-16 (in `content-invariants.md`) are **active**.
 
 ---
 
-<!-- CUSTOMIZE: Replace placeholder rows ([your-env], [.your-class]) with your own.
-     Delete the rows marked "(example — delete)" once you've added yours. -->
+## Skills Quick Reference (most-used for this project)
 
-## Beamer Custom Environments
+- **Data / reproducibility:** `/data-analysis` `/audit-reproducibility` `/diagnose` `/replication-package` `/capture-environment` `/power-analysis` `/disclosure-check`
+- **Papers / review:** `/review-paper` (`--peer`) `/seven-pass-review` `/respond-to-referees` `/verify-claims` `/proofread` `/humanize`
+- **Research / writing:** `/interview-me` `/lit-review` `/research-ideation` `/preregister`
+- **R review:** `/review-r` `/r-package-check`
+- **Meta / workflow:** `/commit` `/learn` `/checkpoint` `/context-status` `/deep-audit`
 
-| Environment | Effect | Use Case |
-| --- | --- | --- |
-| `[your-env]` | [Description] | [When to use] |
-| `keybox` | Gold background box | Key points *(example — delete)* |
-| `definitionbox[Title]` | Blue-bordered titled box | Formal definitions *(example — delete)* |
-
-## Quarto CSS Classes
-
-| Class | Effect | Use Case |
-| --- | --- | --- |
-| `[.your-class]` | [Description] | [When to use] |
-| `.smaller` | 85% font | Dense content *(example — delete)* |
-| `.positive` | Green bold | Good annotations *(example — delete)* |
+Full index in [README.md](README.md#skills-claudeskills).
 
 ---
 
 ## Current Project State
 
-| Lecture | Beamer | Quarto | Key Content |
-| --- | --- | --- | --- |
-| HelloWorld *(sample — delete when ready)* | `HelloWorld.tex` | `HelloWorld.qmd` | Minimal deck to verify setup |
-| 1: [Topic] | `Lecture01_Topic.tex` | `Lecture1_Topic.qmd` | [Brief description] |
+| Milestone | Status | Artifact |
+| --- | --- | --- |
+| Workflow config adapted | ✅ done | `CLAUDE.md`, rules, `.gitignore` |
+| Data prep (esg-messy.R → 01_load/02_clean) | 🔜 next | model-ready `data.frame` |
+| IV construction (exposure map → Z_E/Z_S/Z_G) | ⏳ | `03_analyze.R` |
+| First-stage / weak-IV diagnostics | ⏳ | first-stage robust F (F > 10) |
+| Outcome models (cost of capital, risk, liquidity, …) | ⏳ | `03_analyze.R`, `04_tables.R` |
+| Publication figures | ⏳ | `05_figures.R` → `_outputs/` |
+| Manuscript draft | ⏳ | `paper/main.tex` |
+
+**Data sources.** Sustainalytics ESG risk/pillar/controversy (`esg_proj_2024.csv`,
+`esg_proj_2025.csv`) + the rating-enhancement overview (`ds_standard_esg-risk-…csv`);
+Yahoo Finance income / balance-sheet / cash-flow (annual + quarterly) for controls and outcomes.
+
+**Note.** `esg-messy.R` is exploratory scratch (and reads from `data/` not `data/raw/` — a
+known path bug). It is the *input* to the data-prep task, not a deliverable; it gets refactored
+into the numbered `01_load.R` → `05_figures.R` pipeline.
